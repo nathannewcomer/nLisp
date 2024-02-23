@@ -1,7 +1,7 @@
 mod scanner;
 mod parser;
 
-use std::{env, io::{self, stdout, Write}};
+use std::{env, io::{stdout, Write}};
 
 use crate::{parser::{parse, print_sexpr}, scanner::scan};
 

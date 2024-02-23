@@ -1,6 +1,7 @@
 pub enum Token {
     LeftParen,
     RightParen,
+    Dot,
     Atom(String),
 }
 
@@ -30,6 +31,10 @@ fn scan_token(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Opti
         ')' => {
             *current += 1;
             Some(Token::RightParen)
+        },
+        '.' => {
+            *current += 1;
+            Some(Token::Dot)
         },
         c if c.is_ascii_alphanumeric() => Some(scan_atom(chars, start, current)),
         _ => {
