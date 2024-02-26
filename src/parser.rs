@@ -59,6 +59,7 @@ fn print_atom(atom: &Atom) {
         Atom::Identifier(id) => print_id(id),
         Atom::Str(str) => print!("{}", str),
         Atom::Number(num) => print!("{}", num),
+        Atom::Boolean(bol) => print!("{}", bol),
         Atom::Nil => print!("NIL"),
     }
 }

@@ -10,10 +10,11 @@ pub enum Atom {
     Str(String),
     Identifier(Identifier),
     Number(f32),
+    Boolean(bool),
     Nil
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Identifier {
     // Arithmatic
     Add,
@@ -95,6 +96,10 @@ fn scan_atom(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Token
     if let Ok(num) = atom_str.parse::<f32>() {
         return Token::Atom(Atom::Number(num))
     }
+    // Boolean
+    if let Ok(bol) = atom_str.parse::<bool>() {
+        return Token::Atom(Atom::Boolean(bol));
+    }
     
     // Identifier
     if let Some(id) = match_identifier(&atom_str) {
@@ -107,7 +112,7 @@ fn scan_atom(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Token
 
 fn is_atom_char(c: &char) -> bool {
     match c {
-        '+' | '-' | '*' | '/' | '=' => true,
+        '+' | '-' | '*' | '/' | '=' | '>' => true,
         c if c.is_alphanumeric() => true,
         _ => false
     }
