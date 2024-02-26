@@ -1,14 +1,13 @@
-use crate::scanner::Token;
+use crate::scanner::{Atom, Identifier, Token};
 
 pub enum Sexpr {
-    Atom(String),
+    Atom(Atom),
     Cons(Box<Cons>),
-    Nil
 }
 
 pub struct Cons {
-    car: Sexpr,
-    cdr: Sexpr
+    pub car: Sexpr,
+    pub cdr: Sexpr
 }
 
 pub fn parse(tokens: &Vec<Token>, current: &mut usize) -> Sexpr {
@@ -19,7 +18,7 @@ pub fn parse(tokens: &Vec<Token>, current: &mut usize) -> Sexpr {
         },
         Token::Atom(atom) => {
             *current += 1;
-            Sexpr::Atom(atom.to_string())
+            Sexpr::Atom(atom.clone())
         },
         _ => panic!("Uh oh!")
     }
@@ -32,22 +31,11 @@ pub fn parse(tokens: &Vec<Token>, current: &mut usize) -> Sexpr {
 
 fn parse_cons(tokens: &Vec<Token>, current: &mut usize) -> Cons {
     let car = parse(tokens, current);
-    if matches!(tokens[*current], Token::Dot) {
-        // Regular cons (x . y)
-        
-        *current += 1;   // .
-        let cdr = parse(tokens, current);
-        *current += 1;  // )
-
-        Cons {
-            car,
-            cdr
-        }
-    } else if matches!(tokens[*current], Token::RightParen) {
+    if matches!(tokens[*current], Token::RightParen) {
         *current += 1;
         Cons {
             car,
-            cdr: Sexpr::Nil
+            cdr: Sexpr::Atom(Atom::Nil)
         }
     } else {
         // list
@@ -61,9 +49,39 @@ fn parse_cons(tokens: &Vec<Token>, current: &mut usize) -> Cons {
 
 pub fn print_sexpr(sexpr: &Sexpr) {
     match sexpr {
-        Sexpr::Atom(str) => print!("{}", str),
+        Sexpr::Atom(atom) => print_atom(atom),
         Sexpr::Cons(cons) => print_cons(cons),
-        Sexpr::Nil => print!("NIL")
+    }
+}
+
+fn print_atom(atom: &Atom) {
+    match atom {
+        Atom::Identifier(id) => print_id(id),
+        Atom::Str(str) => print!("{}", str),
+        Atom::Number(num) => print!("{}", num),
+        Atom::Nil => print!("NIL"),
+    }
+}
+
+fn print_id(id: &Identifier) {
+    match id {
+        Identifier::Add => print!("+"),
+        Identifier::Subtract => print!("-"),
+        Identifier::Multiply => print!("*"),
+        Identifier::Divide => print!("/"),
+        Identifier::Greater => print!(">"),
+        Identifier::GreaterOrEqual => print!(">="),
+        Identifier::Listp => print!("listp"),
+        Identifier::Atom => print!("atom"),
+        Identifier::Null => print!("null"),
+        Identifier::Eq => print!("eq"),
+        Identifier::Equal => print!("equal"),
+        Identifier::Cons => print!("cons"),
+        Identifier::Car => print!("car"),
+        Identifier::Cdr => print!("cdr"),
+        Identifier::Append => print!("append"),
+        Identifier::Defun => print!("defun"),
+        Identifier::Eval => print!("eval"),
     }
 }
 

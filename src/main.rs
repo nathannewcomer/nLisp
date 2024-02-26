@@ -1,9 +1,10 @@
 mod scanner;
 mod parser;
+mod interpreter;
 
 use std::{env, io::{stdout, Write}};
 
-use crate::{parser::{parse, print_sexpr}, scanner::scan};
+use crate::{interpreter::evaluate, parser::{parse, print_sexpr}, scanner::scan};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -29,8 +30,17 @@ fn repl() {
         };
 
         let sexpr = parse(&tokens, &mut 0);
-        print!("Parsed as: ");
-        print_sexpr(&sexpr);
+        //print!("Parsed as: ");
+        //print_sexpr(&sexpr);
+
+        let result = evaluate(sexpr);
+
+        match result {
+            interpreter::Value::Str(str) => print!("{}", str),
+            interpreter::Value::Number(num) => print!("{}", num),
+            interpreter::Value::Nil => print!("NIL"),
+        }
+
         println!();
     }
 }

@@ -2,7 +2,44 @@ pub enum Token {
     LeftParen,
     RightParen,
     Dot,
-    Atom(String),
+    Atom(Atom),
+}
+
+#[derive(Clone)]
+pub enum Atom {
+    Str(String),
+    Identifier(Identifier),
+    Number(f32),
+    Nil
+}
+
+#[derive(Clone)]
+pub enum Identifier {
+    // Arithmatic
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Greater,
+    GreaterOrEqual,
+
+    // Predicate
+    Listp,
+    Atom,
+    Null,
+    Eq,
+    Equal,
+
+
+    // Lists
+    Cons,
+    Car,
+    Cdr,
+    Append,
+
+    // Functions
+    Defun,
+    Eval
 }
 
 pub fn scan(line: &String) -> Vec<Token> {
@@ -36,7 +73,7 @@ fn scan_token(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Opti
             *current += 1;
             Some(Token::Dot)
         },
-        c if c.is_ascii_alphanumeric() => Some(scan_atom(chars, start, current)),
+        c if is_atom_char(&c) => Some(scan_atom(chars, start, current)),
         _ => {
             *current += 1;
             None
@@ -47,11 +84,62 @@ fn scan_token(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Opti
 }
 
 fn scan_atom(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Token {
-    while chars[*current].is_alphanumeric() {
+    while is_atom_char(&chars[*current]) {
         *current += 1;
     }
 
-    let atom: String = chars[*start..*current].iter().collect();
+    let atom_str: String = chars[*start..*current].iter().collect();
     *start = *current;
-    Token::Atom(atom)
+
+    // Number
+    if let Ok(num) = atom_str.parse::<f32>() {
+        return Token::Atom(Atom::Number(num))
+    }
+    
+    // Identifier
+    if let Some(id) = match_identifier(&atom_str) {
+        return Token::Atom(Atom::Identifier(id))
+    }
+    
+    // String
+    Token::Atom(Atom::Str(atom_str))
+}
+
+fn is_atom_char(c: &char) -> bool {
+    match c {
+        '+' | '-' | '*' | '/' | '=' => true,
+        c if c.is_alphanumeric() => true,
+        _ => false
+    }
+}
+
+fn match_identifier(id: &String) -> Option<Identifier> {
+    match id.as_str() {
+        // Arithmatic
+        "+" => Some(Identifier::Add),
+        "-" => Some(Identifier::Subtract),
+        "*" => Some(Identifier::Multiply),
+        "/" => Some(Identifier::Divide),
+        ">" => Some(Identifier::Greater),
+        ">=" => Some(Identifier::GreaterOrEqual),
+
+        // Predicate
+        "listp" => Some(Identifier::Listp),
+        "atom" => Some(Identifier::Atom),
+        "null" => Some(Identifier::Null),
+        "eq" => Some(Identifier::Eq),
+        "equal" => Some(Identifier::Equal),
+
+        // Lists
+        "cons" => Some(Identifier::Cons),
+        "car" => Some(Identifier::Car),
+        "cdr" => Some(Identifier::Cdr),
+        "append" => Some(Identifier::Append),
+
+        // Functions
+        "defun" => Some(Identifier::Defun),
+        "eval" => Some(Identifier::Eval),
+
+        _ => None
+    }
 }
