@@ -1,20 +1,19 @@
 use crate::{parser::{Cons, Sexpr}, scanner::{Atom, Identifier}};
 
-pub enum Value {
-    Str(String),
-    Number(f32),
-    Boolean(bool),
-    Nil
+pub struct Function {
+    name: String,
+    args: Sexpr,
+    body: Sexpr
 }
 
-pub fn evaluate(sexpr: Sexpr) -> Value {
+pub fn evaluate(sexpr: Sexpr) -> Sexpr {
     match sexpr {
         Sexpr::Atom(atom) => evaluate_atom(atom),
         Sexpr::Cons(cons) => evalute_cons(*cons),
     }
 }
 
-fn evalute_cons(cons: Cons) -> Value {
+fn evalute_cons(cons: Cons) -> Sexpr {
     match cons.car {
         Sexpr::Atom(atom) => {
             if let Atom::Identifier(id) = atom {
@@ -36,26 +35,28 @@ fn evalute_cons(cons: Cons) -> Value {
                     Identifier::Append => todo!(),
                     Identifier::Defun => todo!(),
                     Identifier::Eval => todo!(),
+                    Identifier::Quote => todo!(),
+                    Identifier::Length => length(cons.cdr)
                 }
             } else {
-                panic!("I don't think this should happen...");
+                panic!("Error: Operator is not a procedure");
             }
         },
         Sexpr::Cons(cons) => evalute_cons(*cons),
     }
 }
 
-fn evaluate_atom(atom: Atom) -> Value {
+fn evaluate_atom(atom: Atom) -> Sexpr {
     match atom {
         Atom::Identifier(id) => panic!("Error: expected atom, found identifier {:?}", id),
-        Atom::Str(str) => Value::Str(str),
-        Atom::Number(num) => Value::Number(num),
-        Atom::Boolean(bol) => Value::Boolean(bol),
-        Atom::Nil => Value::Nil,
+        Atom::Str(str) => Sexpr::Atom(Atom::Str(str)),
+        Atom::Number(num) => Sexpr::Atom(Atom::Number(num)),
+        Atom::Boolean(bol) => Sexpr::Atom(Atom::Boolean(bol)),
+        Atom::Nil => Sexpr::Atom(Atom::Nil),
     }
 }
 
-fn arithmetic(f: fn(f32, f32) -> f32, sexpr: Sexpr) -> Value {
+fn arithmetic(f: fn(f32, f32) -> f32, sexpr: Sexpr) -> Sexpr {
     match sexpr {
         Sexpr::Atom(atom) => evaluate_atom(atom),
         Sexpr::Cons(cons) => {
@@ -64,9 +65,10 @@ fn arithmetic(f: fn(f32, f32) -> f32, sexpr: Sexpr) -> Value {
 
             match (car, cdr) {
                 // Two numbers
-                (Value::Number(x), Value::Number(y)) => Value::Number(f(x, y)),
+                (Sexpr::Atom(Atom::Number(x)), Sexpr::Atom(Atom::Number(y)))
+                    => Sexpr::Atom(Atom::Number(f(x, y))),
                 // Number and NIL
-                (x @ Value::Number(_), Value::Nil) => x,
+                (x @ Sexpr::Atom(Atom::Number(_)), Sexpr::Atom(Atom::Nil)) => x,
                 // Other: (Number, String), (Nil, Number), etc. We can't evaluate these
                 _ => panic!("Error: Either car or cdr is not a number")
             }
@@ -74,7 +76,7 @@ fn arithmetic(f: fn(f32, f32) -> f32, sexpr: Sexpr) -> Value {
     }
 }
 
-fn conditional(f: fn(f32, f32) -> bool, sexpr: Sexpr) -> Value {
+fn conditional(f: fn(f32, f32) -> bool, sexpr: Sexpr) -> Sexpr {
     match sexpr {
         Sexpr::Atom(atom) => evaluate_atom(atom),
         Sexpr::Cons(cons) => {
@@ -83,12 +85,26 @@ fn conditional(f: fn(f32, f32) -> bool, sexpr: Sexpr) -> Value {
 
             match (car, cdr) {
                 // Two numbers
-                (Value::Number(x), Value::Number(y)) => Value::Boolean(f(x, y)),
+                (Sexpr::Atom(Atom::Number(x)), Sexpr::Atom(Atom::Number(y)))
+                    => Sexpr::Atom(Atom::Boolean(f(x, y))),
                 // Number and NIL
-                (x @ Value::Number(_), Value::Nil) => x,
+                (x @ Sexpr::Atom(Atom::Number(_)), Sexpr::Atom(Atom::Nil)) => x,
                 // Other: (Number, String), (Nil, Number), etc. We can't evaluate these
                 _ => panic!("Error: Either car or cdr is not a number")
             }
+        },
+    }
+}
+
+fn length(sexpr: Sexpr) -> Sexpr {
+    match sexpr {
+        Sexpr::Atom(_) => Sexpr::Atom(Atom::Number(1.0)),
+        Sexpr::Cons(cons) => {
+            if let Sexpr::Atom(Atom::Number(l1)) = length(cons.cdr) {
+                Sexpr::Atom(Atom::Number(l1 + 1.0))
+             } else {
+                panic!("Error: Expected number")
+             }
         },
     }
 }

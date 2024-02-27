@@ -40,7 +40,9 @@ pub enum Identifier {
 
     // Functions
     Defun,
-    Eval
+    Eval,
+    Quote,
+    Length
 }
 
 pub fn scan(line: &String) -> Vec<Token> {

@@ -35,12 +35,7 @@ fn repl() {
 
         let result = evaluate(sexpr);
 
-        match result {
-            interpreter::Value::Str(str) => print!("{}", str),
-            interpreter::Value::Number(num) => print!("{}", num),
-            interpreter::Value::Boolean(bol) => if bol {print!("#t")} else {print!("#f")},
-            interpreter::Value::Nil => print!("NIL"),
-        }
+        print!("{}", print_sexpr(&result));
 
         println!();
     }
