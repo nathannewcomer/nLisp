@@ -35,8 +35,8 @@ fn evalute_cons(cons: Cons) -> Sexpr {
             
                     // Lists
                     "cons" => todo!(),
-                    "car" => car(cons.cdr),
-                    "cdr" => cdr(cons.cdr),
+                    "car" => car(evaluate(cons.cdr)),
+                    "cdr" => cdr(evaluate(cons.cdr)),
                     "append" => todo!(),
             
                     // Functions
@@ -128,14 +128,14 @@ fn quote(sexpr: Sexpr) -> Sexpr {
 fn car(sexpr: Sexpr) -> Sexpr {
     match sexpr {
         Sexpr::Atom(_) => panic!("Error: s-expresson is atom"),
-        Sexpr::Cons(cons) => evaluate(cons.car),
+        Sexpr::Cons(cons) => cons.car,
     }
 }
 
 fn cdr(sexpr: Sexpr) -> Sexpr {
     match sexpr {
         Sexpr::Atom(_) => panic!("Error: s-expresson is atom"),
-        Sexpr::Cons(cons) => evaluate(cons.cdr),
+        Sexpr::Cons(cons) => cons.cdr,
     }
 }
 
