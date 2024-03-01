@@ -41,7 +41,7 @@ fn evalute_cons(cons: Cons) -> Sexpr {
             
                     // Functions
                     "defun" => todo!(),
-                    "eval" => todo!(),
+                    "eval" => eval(cons.cdr),
             
                     "quote" => quote(cons.cdr),
                     "length" => length(cons.cdr),
@@ -136,6 +136,13 @@ fn cdr(sexpr: Sexpr) -> Sexpr {
     match sexpr {
         Sexpr::Atom(_) => panic!("Error: s-expresson is atom"),
         Sexpr::Cons(cons) => cons.cdr,
+    }
+}
+
+fn eval(sexpr: Sexpr) -> Sexpr {
+    match sexpr {
+        atom @ Sexpr::Atom(_) => atom,
+        Sexpr::Cons(cons) => evaluate(cons.car),
     }
 }
 
