@@ -7,8 +7,8 @@ pub enum Token {
 
 #[derive(Clone)]
 pub enum Atom {
-    Str(String),
-    Identifier(Identifier),
+    Symbol(String),
+    //Identifier(Identifier),
     Number(f32),
     Boolean(bool),
     Nil
@@ -103,13 +103,8 @@ fn scan_atom(chars: &Vec<char>, start: &mut usize, current: &mut usize) -> Token
         return Token::Atom(Atom::Boolean(bol));
     }
     
-    // Identifier
-    if let Some(id) = match_identifier(&atom_str) {
-        return Token::Atom(Atom::Identifier(id))
-    }
-    
-    // String
-    Token::Atom(Atom::Str(atom_str))
+    // Symbol
+    Token::Atom(Atom::Symbol(atom_str))
 }
 
 fn is_atom_char(c: &char) -> bool {
@@ -146,6 +141,9 @@ fn match_identifier(id: &String) -> Option<Identifier> {
         // Functions
         "defun" => Some(Identifier::Defun),
         "eval" => Some(Identifier::Eval),
+
+        "quote" => Some(Identifier::Quote),
+        "length" => Some(Identifier::Length),
 
         _ => None
     }

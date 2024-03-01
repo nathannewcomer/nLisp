@@ -16,27 +16,37 @@ pub fn evaluate(sexpr: Sexpr) -> Sexpr {
 fn evalute_cons(cons: Cons) -> Sexpr {
     match cons.car {
         Sexpr::Atom(atom) => {
-            if let Atom::Identifier(id) = atom {
-                match id {
-                    Identifier::Add => arithmetic(|x, y| x + y, cons.cdr),
-                    Identifier::Subtract => arithmetic(|x, y| x - y, cons.cdr),
-                    Identifier::Multiply => arithmetic(|x, y| x * y, cons.cdr),
-                    Identifier::Divide => arithmetic(|x, y| x / y, cons.cdr),
-                    Identifier::Greater => conditional(|x, y| x > y, cons.cdr),
-                    Identifier::GreaterOrEqual => conditional(|x, y| x >= y, cons.cdr),
-                    Identifier::Listp => todo!(),
-                    Identifier::Atom => todo!(),
-                    Identifier::Null => todo!(),
-                    Identifier::Eq => todo!(),
-                    Identifier::Equal => todo!(),
-                    Identifier::Cons => todo!(),
-                    Identifier::Car => todo!(),
-                    Identifier::Cdr => todo!(),
-                    Identifier::Append => todo!(),
-                    Identifier::Defun => todo!(),
-                    Identifier::Eval => todo!(),
-                    Identifier::Quote => todo!(),
-                    Identifier::Length => length(cons.cdr)
+            if let Atom::Symbol(name) = atom {
+                match name.as_str() {
+                    // Arithmatic
+                    "+" => arithmetic(|x, y| x + y, cons.cdr),
+                    "-" => arithmetic(|x, y| x - y, cons.cdr),
+                    "*" => arithmetic(|x, y| x * y, cons.cdr),
+                    "/" => arithmetic(|x, y| x / y, cons.cdr),
+                    ">" => conditional(|x, y| x > y, cons.cdr),
+                    ">=" => conditional(|x, y| x >= y, cons.cdr),
+            
+                    // Predicate
+                    "listp" => todo!(),
+                    "atom" => todo!(),
+                    "null" => todo!(),
+                    "eq" => todo!(),
+                    "equal" => todo!(),
+            
+                    // Lists
+                    "cons" => todo!(),
+                    "car" => car(cons.cdr),
+                    "cdr" => cdr(cons.cdr),
+                    "append" => todo!(),
+            
+                    // Functions
+                    "defun" => todo!(),
+                    "eval" => todo!(),
+            
+                    "quote" => quote(cons.cdr),
+                    "length" => length(cons.cdr),
+            
+                    _ => panic!("Operator \"{name}\" is not a procedure")
                 }
             } else {
                 panic!("Error: Operator is not a procedure");
@@ -48,8 +58,7 @@ fn evalute_cons(cons: Cons) -> Sexpr {
 
 fn evaluate_atom(atom: Atom) -> Sexpr {
     match atom {
-        Atom::Identifier(id) => panic!("Error: expected atom, found identifier {:?}", id),
-        Atom::Str(str) => Sexpr::Atom(Atom::Str(str)),
+        Atom::Symbol(str) => Sexpr::Atom(Atom::Symbol(str)),
         Atom::Number(num) => Sexpr::Atom(Atom::Number(num)),
         Atom::Boolean(bol) => Sexpr::Atom(Atom::Boolean(bol)),
         Atom::Nil => Sexpr::Atom(Atom::Nil),
@@ -108,3 +117,25 @@ fn length(sexpr: Sexpr) -> Sexpr {
         },
     }
 }
+
+fn quote(sexpr: Sexpr) -> Sexpr {
+    match sexpr {
+        atom @ Sexpr::Atom(_) => atom,
+        Sexpr::Cons(cons) => cons.car,
+    }
+}
+
+fn car(sexpr: Sexpr) -> Sexpr {
+    match sexpr {
+        Sexpr::Atom(_) => panic!("Error: s-expresson is atom"),
+        Sexpr::Cons(cons) => evaluate(cons.car),
+    }
+}
+
+fn cdr(sexpr: Sexpr) -> Sexpr {
+    match sexpr {
+        Sexpr::Atom(_) => panic!("Error: s-expresson is atom"),
+        Sexpr::Cons(cons) => evaluate(cons.cdr),
+    }
+}
+

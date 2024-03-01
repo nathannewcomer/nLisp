@@ -56,8 +56,7 @@ pub fn print_sexpr(sexpr: &Sexpr) -> String {
 
 fn print_atom(atom: &Atom) -> String {
     match atom {
-        Atom::Identifier(id) => print_id(id),
-        Atom::Str(str) => format!("{}", str),
+        Atom::Symbol(str) => format!("{}", str),
         Atom::Number(num) => format!("{}", num),
         Atom::Boolean(bol) => match bol {
             true => "#t".to_string(),
